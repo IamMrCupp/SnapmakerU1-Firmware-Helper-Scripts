@@ -2,60 +2,51 @@
 
 BINARY="$1"
 
-echo "=== Searching for 96+ consecutive zeros in 0x31b000-0x31d000 region ==="
+echo "=== Searching for long zero runs in 0x31b000-0x31d000 region ==="
 echo ""
 
-xxd "$BINARY" | awk '
+# Simpler approach that works on macOS awk
+xxd "$BINARY" | grep "^0031[bcd]" | awk '
 BEGIN {
-    target_start = 0x31b000
-    target_end = 0x31d000
     zero_start = ""
     zero_count = 0
-    found_count = 0
+    prev_was_zero = 0
 }
 {
-    # Get the address
-    addr_str = $1
-    gsub(/:/, "", addr_str)
-    addr = strtonum("0x" addr_str)
+    addr = $1
+    # Check if line is all zeros (columns 2-9 should be all zeros)
+    hex_line = $2 $3 $4 $5 $6 $7 $8 $9
+    is_zero = (hex_line ~ /^0+$/)
     
-    # Check if in target range
-    if (addr < target_start || addr >= target_end) next
-    
-    # Extract hex bytes
-    hex_data = ""
-    for (i = 2; i <= 9; i++) {
-        hex_data = hex_data $i
-    }
-    
-    # Check if all zeros
-    if (hex_data ~ /^0+$/) {
-        if (zero_count == 0) {
-            zero_start = addr_str
+    if (is_zero) {
+        if (!prev_was_zero) {
+            zero_start = addr
+            zero_count = 0
         }
         zero_count += 16
+        prev_was_zero = 1
     } else {
-        # Print if we found a good chunk
-        if (zero_count >= 96 && found_count < 3) {
-            printf "Found %d zero bytes at 0x%s\n", zero_count, zero_start
-            found_count++
+        if (prev_was_zero && zero_count >= 96) {
+            print "Found " zero_count " zero bytes at " zero_start
         }
+        prev_was_zero = 0
         zero_count = 0
     }
 }
 END {
-    if (zero_count >= 96 && found_count < 3) {
-        printf "Found %d zero bytes at 0x%s\n", zero_count, zero_start
-    }
-    if (found_count == 0) {
-        print "No 96+ byte zero regions found in 0x31b000-0x31d000"
-        print ""
-        print "Alternative: We could OVERWRITE unused filament types"
-        print "Or expand the binary to add more space"
+    if (prev_was_zero && zero_count >= 96) {
+        print "Found " zero_count " zero bytes at " zero_start
     }
 }
 '
 
 echo ""
-echo "=== Alternative: Check end of .rodata section ==="
-readelf -S "$BINARY" 2>/dev/null | grep rodata
+echo "=== Reality check: Do we actually NEED 11 profiles on touchscreen? ==="
+echo "Given the space constraints, we could:"
+echo "1. REPLACE the existing 5 Polymaker strings with our preferred 5"
+echo "2. Keep the other 7 profiles accessible only via web interface"
+echo ""
+echo "Current 5 strings:"
+strings "$BINARY" | grep -A 5 "Polylite PLA" | head -6
+echo ""
+echo "Which 5 should we prioritize for touchscreen?"
