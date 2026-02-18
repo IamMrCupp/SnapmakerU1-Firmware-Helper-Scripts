@@ -58,6 +58,8 @@ These scripts help you understand the binary structure and locate important data
 ### Debugging Scripts
 
 - **`debug-rfid.sh`** - Debug RFID/NFC functionality on Snapmaker U1 printer (requires SSH access)
+- **`check-firmware-version.sh`** - Check firmware version and extended features on printer (requires SSH access)
+- **`compare-rfid-modules.sh`** - Compare RFID modules between printer and local overlay (requires SSH access)
 
 ## Usage
 
@@ -98,7 +100,9 @@ After patching, verify the changes were applied correctly:
 ### 3. Deploy the Patched Binary
 
 Follow your device's firmware update procedure to deploy the modified GUI binary. **Always keep a backup of the original!**
-## Debugging RFID/NFC
+## Debugging & Diagnostics
+
+### Debug RFID/NFC
 
 To debug RFID/NFC functionality on your Snapmaker U1:
 
@@ -113,7 +117,37 @@ Example:
 PASSWORD=mypassword ./debug-rfid.sh 192.168.1.100 default
 ```
 
-This script requires:
+### Check Firmware Version
+
+To check the current firmware version and extended features:
+
+```bash
+./check-firmware-version.sh <printer-hostname> <profile>
+```
+
+Example:
+```bash
+./check-firmware-version.sh snapmaker-u1 default
+# or with custom password
+PASSWORD=mypassword ./check-firmware-version.sh 192.168.1.100 default
+```
+
+### Compare RFID Modules
+
+To compare RFID modules between your printer and local overlay:
+
+```bash
+./compare-rfid-modules.sh <printer-hostname> <profile>
+```
+
+Example:
+```bash
+./compare-rfid-modules.sh snapmaker-u1 default
+# or with custom password
+PASSWORD=mypassword ./compare-rfid-modules.sh 192.168.1.100 default
+```
+
+**Requirements for SSH scripts:**
 - SSH access to your printer (root user)
 - `sshpass` installed (`brew install sshpass` on macOS)
 - Network connectivity to the printer
@@ -193,8 +227,10 @@ REPLACEMENTS = [
 .
 ├── analyze-crash.sh                  # Analyze address ranges for crashes
 ├── analyze-gui.sh                    # Analyze binary structure
+├── check-firmware-version.sh         # Check firmware version and features (SSH)
 ├── check-generic-space.sh            # Check space after generic filaments
 ├── check-space.sh                    # Check available space
+├── compare-rfid-modules.sh           # Compare RFID modules (SSH)
 ├── debug-rfid.sh                     # Debug RFID/NFC functionality (SSH)
 ├── find-array-usage.sh               # Find array patterns
 ├── find-empty-space.sh               # Locate empty space
