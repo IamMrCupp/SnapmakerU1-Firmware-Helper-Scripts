@@ -32,17 +32,25 @@ These scripts allow you to reverse-engineer and modify the Snapmaker U1's GUI bi
 These scripts help you understand the binary structure and locate important data:
 
 - **`analyze-gui.sh`** - Analyzes the GUI binary to find filament strings and architecture info
+- **`analyze-crash.sh`** - Analyzes address ranges to diagnose crashes and validate memory regions
 - **`check-space.sh`** - Verifies available space for new strings and pointers
+- **`check-generic-space.sh`** - Checks space after generic filaments for potential use
 - **`find-array-usage.sh`** - Locates array patterns in the binary
 - **`find-empty-space.sh`** - Finds unused/empty space in the binary
 - **`find-loop-counter.sh`** - Searches for loop counter patterns
 - **`find-pointers.sh`** - Locates pointer arrays to filament strings
+- **`find-space-in-region.sh`** - Searches for long zero runs in specific memory regions
 - **`find-trans-type-function.sh`** - Finds translation type functions
 
 ### Patching Scripts
 
-- **`patch-gui-binary.py`** - Python script that patches the binary to add new filament profiles
+- **`patch-gui-binary.py`** - Adds new filament profiles by injecting strings into empty space
+- **`replace-gui-strings.py`** - Replaces existing Polymaker strings in-place with preferred profiles
 - **`patch-gui.sh`** - Shell script wrapper for analyzing and preparing patches
+
+### Verification Scripts
+
+- **`verify-patches.sh`** - Verifies patched binary structure, strings, and pointers are correct
 
 ## Usage
 
@@ -58,21 +66,37 @@ First, run the analysis scripts to understand the binary structure:
 
 ### 2. Patch the Binary
 
-Use the Python patcher to add new filament profiles:
+You have two patching options:
 
+**Option A: Add new profiles (injects strings into empty space)**
 ```bash
 ./patch-gui-binary.py <path-to-gui-binary> [output-file]
 ```
 
+**Option B: Replace existing profiles in-place**
+```bash
+./replace-gui-strings.py <path-to-gui-binary> [output-file]
+```
+
 The default output location is `output/gui-patched`.
+
+### 3. Verify the Patch
+
+After patching, verify the changes were applied correctly:
+
+```bash
+./verify-patches.sh output/gui-patched
+```
 
 ### 3. Deploy the Patched Binary
 
 Follow your device's firmware update procedure to deploy the modified GUI binary. **Always keep a backup of the original!**
 
-## Default Filament Profiles Added
+## Patching Methods
 
-The patcher adds these Polymaker filament profiles:
+### Method 1: Add New Profiles (patch-gui-binary.py)
+
+This method injects 6 new filament profiles into unused memory space:
 
 1. **Panchroma PLA**
 2. **Panchroma Matte**
@@ -81,7 +105,25 @@ The patcher adds these Polymaker filament profiles:
 5. **PolyMax PLA**
 6. **PolyMax PETG**
 
+**Pros**: Keeps all original profiles  
+**Cons**: May have address range validation issues on some firmware versions
+
+### Method 2: Replace Existing Profiles (replace-gui-strings.py)
+
+This method replaces 5 existing Polymaker profiles in-place:
+
+- Polylite PLA → **Panchroma PLA**
+- PolySonic PLA → **Panchroma Matte**
+- PolyTerra PLA → **Panchroma Silk**
+- Polylite ABS → **PolyMax PLA**
+- Polylite PETG → **PolyMax PETG**
+
+**Pros**: More stable, no address range issues  
+**Cons**: Replaces existing profiles (though all 12 profiles still work in Klipper/web interface)
+
 ## Customization
+
+### Adding New Profiles
 
 To modify which profiles are added, edit the `NEW_PROFILES` list in [patch-gui-binary.py](patch-gui-binary.py):
 
@@ -90,6 +132,17 @@ NEW_PROFILES = [
     "Your Profile 1",   # Max 15 characters
     "Your Profile 2",
     # Add more profiles here
+]
+```
+
+### Replacing Existing Profiles
+
+To change which profiles are replaced in-place, edit the `REPLACEMENTS` list in [replace-gui-strings.py](replace-gui-strings.py):
+
+```python
+REPLACEMENTS = [
+    (0x31b7f0, "Polylite PLA",   "Your New Profile"),
+    # Add more replacements here
 ]
 ```
 
@@ -113,15 +166,20 @@ NEW_PROFILES = [
 
 ```
 .
+├── analyze-crash.sh                  # Analyze address ranges for crashes
 ├── analyze-gui.sh                    # Analyze binary structure
+├── check-generic-space.sh            # Check space after generic filaments
 ├── check-space.sh                    # Check available space
 ├── find-array-usage.sh               # Find array patterns
 ├── find-empty-space.sh               # Locate empty space
 ├── find-loop-counter.sh              # Find loop counters
 ├── find-pointers.sh                  # Find pointer arrays
+├── find-space-in-region.sh           # Find zero runs in memory regions
 ├── find-trans-type-function.sh       # Find translation functions
-├── patch-gui-binary.py               # Main Python patcher
+├── patch-gui-binary.py               # Add new profiles (injection method)
+├── replace-gui-strings.py            # Replace existing profiles (in-place method)
 ├── patch-gui.sh                      # Shell patcher wrapper
+├── verify-patches.sh                 # Verify patched binary integrity
 └── output/                           # Output directory for patched files
     └── gui-patched                   # Default output filename
 ```
