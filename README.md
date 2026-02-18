@@ -1,10 +1,26 @@
 # Snapmaker U1 Firmware Helper Scripts
 
-A collection of scripts for analyzing and patching the Snapmaker U1 GUI binary to add custom filament profiles.
+A collection of scripts for analyzing and patching the Snapmaker U1 GUI binary to add custom filament profiles, plus RFID/NFC debugging utilities.
 
 ## Overview
 
-These scripts allow you to reverse-engineer and modify the Snapmaker U1's GUI binary to add additional filament type profiles. The default firmware includes support for several Polymaker filaments, and these tools enable you to add more custom profiles.
+These scripts allow you to reverse-engineer and modify the Snapmaker U1's GUI binary to add additional filament type profiles. The default firmware includes support for several Polymaker filaments, and these tools enable you to add more custom profiles. Additionally, RFID/NFC helper scripts provide diagnostic capabilities for debugging filament detection features.
+
+## Repository Organization
+
+Scripts are organized by functional purpose for easier navigation and maintenance:
+
+- **`gui-changes/`** - GUI binary analysis and patching tools
+  - Analysis scripts for understanding binary structure
+  - Patching scripts for modifying filament profiles
+  - Verification scripts for validating patches
+  
+- **`rfid-helpers/`** - RFID/NFC debugging and diagnostic utilities
+  - Requires SSH access to printer
+  - Debug RFID/NFC functionality
+  - Compare firmware modules and versions
+  
+- **`output/`** - Default output directory for patched binaries
 
 ## ⚠️ Important Warnings
 
@@ -26,11 +42,11 @@ These scripts allow you to reverse-engineer and modify the Snapmaker U1's GUI bi
   - `file` (file type identification)
   - `sshpass` (for SSH automation, install via: `brew install sshpass` on macOS)
 
-**Getting Help**: All scripts support `-h`, `--help`, or running without arguments to display usage information.
+**Getting Help**: All scripts support `-h`, `--help`, or running without arguments to display usage information. Scripts are organized in `gui-changes/` and `rfid-helpers/` directories.
 
 ## Scripts
 
-### Analysis Scripts
+### GUI Binary Analysis Scripts (`gui-changes/`)
 
 These scripts help you understand the binary structure and locate important data:
 
@@ -45,17 +61,17 @@ These scripts help you understand the binary structure and locate important data
 - **`find-space-in-region.sh`** - Searches for long zero runs in specific memory regions
 - **`find-trans-type-function.sh`** - Finds translation type functions
 
-### Patching Scripts
+### GUI Binary Patching Scripts (`gui-changes/`)
 
 - **`patch-gui-binary.py`** - Adds new filament profiles by injecting strings into empty space
 - **`replace-gui-strings.py`** - Replaces existing Polymaker strings in-place with preferred profiles
 - **`patch-gui.sh`** - Shell script wrapper for analyzing and preparing patches
 
-### Verification Scripts
+### GUI Binary Verification Scripts (`gui-changes/`)
 
 - **`verify-patches.sh`** - Verifies patched binary structure, strings, and pointers are correct
 
-### Debugging Scripts
+### RFID/NFC Debugging Scripts (`rfid-helpers/`)
 
 - **`debug-rfid.sh`** - Debug RFID/NFC functionality on Snapmaker U1 printer (requires SSH access)
 - **`check-firmware-version.sh`** - Check firmware version and extended features on printer (requires SSH access)
@@ -63,14 +79,16 @@ These scripts help you understand the binary structure and locate important data
 
 ## Usage
 
+**Note:** Scripts are organized into directories by function. All GUI binary tools are in `gui-changes/`, while RFID/NFC debugging scripts are in `rfid-helpers/`.
+
 ### 1. Analyze the Binary
 
 First, run the analysis scripts to understand the binary structure:
 
 ```bash
-./analyze-gui.sh <path-to-gui-binary>
-./check-space.sh <path-to-gui-binary>
-./find-pointers.sh <path-to-gui-binary>
+./gui-changes/analyze-gui.sh <path-to-gui-binary>
+./gui-changes/check-space.sh <path-to-gui-binary>
+./gui-changes/find-pointers.sh <path-to-gui-binary>
 ```
 
 ### 2. Patch the Binary
@@ -79,12 +97,12 @@ You have two patching options:
 
 **Option A: Add new profiles (injects strings into empty space)**
 ```bash
-./patch-gui-binary.py <path-to-gui-binary> [output-file]
+./gui-changes/patch-gui-binary.py <path-to-gui-binary> [output-file]
 ```
 
 **Option B: Replace existing profiles in-place**
 ```bash
-./replace-gui-strings.py <path-to-gui-binary> [output-file]
+./gui-changes/replace-gui-strings.py <path-to-gui-binary> [output-file]
 ```
 
 The default output location is `output/gui-patched`.
@@ -94,7 +112,7 @@ The default output location is `output/gui-patched`.
 After patching, verify the changes were applied correctly:
 
 ```bash
-./verify-patches.sh output/gui-patched
+./gui-changes/verify-patches.sh output/gui-patched
 ```
 
 ### 3. Deploy the Patched Binary
@@ -107,14 +125,14 @@ Follow your device's firmware update procedure to deploy the modified GUI binary
 To debug RFID/NFC functionality on your Snapmaker U1:
 
 ```bash
-./debug-rfid.sh <printer-hostname> <profile>
+./rfid-helpers/debug-rfid.sh <printer-hostname> <profile>
 ```
 
 Example:
 ```bash
-./debug-rfid.sh snapmaker-u1 default
+./rfid-helpers/debug-rfid.sh snapmaker-u1 default
 # or with custom password
-PASSWORD=mypassword ./debug-rfid.sh 192.168.1.100 default
+PASSWORD=mypassword ./rfid-helpers/debug-rfid.sh 192.168.1.100 default
 ```
 
 ### Check Firmware Version
@@ -122,14 +140,14 @@ PASSWORD=mypassword ./debug-rfid.sh 192.168.1.100 default
 To check the current firmware version and extended features:
 
 ```bash
-./check-firmware-version.sh <printer-hostname> <profile>
+./rfid-helpers/check-firmware-version.sh <printer-hostname> <profile>
 ```
 
 Example:
 ```bash
-./check-firmware-version.sh snapmaker-u1 default
+./rfid-helpers/check-firmware-version.sh snapmaker-u1 default
 # or with custom password
-PASSWORD=mypassword ./check-firmware-version.sh 192.168.1.100 default
+PASSWORD=mypassword ./rfid-helpers/check-firmware-version.sh 192.168.1.100 default
 ```
 
 ### Compare RFID Modules
@@ -137,14 +155,14 @@ PASSWORD=mypassword ./check-firmware-version.sh 192.168.1.100 default
 To compare RFID modules between your printer and local overlay:
 
 ```bash
-./compare-rfid-modules.sh <printer-hostname> <profile>
+./rfid-helpers/compare-rfid-modules.sh <printer-hostname> <profile>
 ```
 
 Example:
 ```bash
-./compare-rfid-modules.sh snapmaker-u1 default
+./rfid-helpers/compare-rfid-modules.sh snapmaker-u1 default
 # or with custom password
-PASSWORD=mypassword ./compare-rfid-modules.sh 192.168.1.100 default
+PASSWORD=mypassword ./rfid-helpers/compare-rfid-modules.sh 192.168.1.100 default
 ```
 
 **Requirements for SSH scripts:**
@@ -184,7 +202,7 @@ This method replaces 5 existing Polymaker profiles in-place:
 
 ### Adding New Profiles
 
-To modify which profiles are added, edit the `NEW_PROFILES` list in [patch-gui-binary.py](patch-gui-binary.py):
+To modify which profiles are added, edit the `NEW_PROFILES` list in [gui-changes/patch-gui-binary.py](gui-changes/patch-gui-binary.py):
 
 ```python
 NEW_PROFILES = [
@@ -196,7 +214,7 @@ NEW_PROFILES = [
 
 ### Replacing Existing Profiles
 
-To change which profiles are replaced in-place, edit the `REPLACEMENTS` list in [replace-gui-strings.py](replace-gui-strings.py):
+To change which profiles are replaced in-place, edit the `REPLACEMENTS` list in [gui-changes/replace-gui-strings.py](gui-changes/replace-gui-strings.py):
 
 ```python
 REPLACEMENTS = [
@@ -208,6 +226,12 @@ REPLACEMENTS = [
 **Note**: Each profile name must be 15 characters or less (plus null terminator = 16 bytes total).
 
 ## Technical Details
+
+### Directory Organization
+
+- **`gui-changes/`** - All scripts for analyzing, patching, and verifying GUI binary modifications
+- **`rfid-helpers/`** - All scripts for RFID/NFC debugging and firmware inspection (require SSH access)
+- **`output/`** - Default location for patched binaries and generated files
 
 ### Binary Offsets (ARM64)
 
@@ -225,26 +249,28 @@ REPLACEMENTS = [
 
 ```
 .
-├── analyze-crash.sh                  # Analyze address ranges for crashes
-├── analyze-gui.sh                    # Analyze binary structure
-├── check-firmware-version.sh         # Check firmware version and features (SSH)
-├── check-generic-space.sh            # Check space after generic filaments
-├── check-space.sh                    # Check available space
-├── compare-rfid-modules.sh           # Compare RFID modules (SSH)
-├── debug-rfid.sh                     # Debug RFID/NFC functionality (SSH)
-├── find-array-usage.sh               # Find array patterns
-├── find-empty-space.sh               # Locate empty space
-├── find-loop-counter.sh              # Find loop counters
-├── find-pointers.sh                  # Find pointer arrays
-├── find-space-in-region.sh           # Find zero runs in memory regions
-├── find-trans-type-function.sh       # Find translation functions
-├── patch-gui-binary.py               # Add new profiles (injection method)
-├── replace-gui-strings.py            # Replace existing profiles (in-place method)
-├── patch-gui.sh                      # Shell patcher wrapper
-├── verify-patches.sh                 # Verify patched binary integrity
-└── output/                           # Output directory for patched files
-    └── gui-patched                   # Default output filename
+├── gui-changes/                      # GUI binary patching tools
+│   ├── analyze-crash.sh              # Analyze address ranges for crashes
+│   ├── analyze-gui.sh                # Analyze binary structure
+│   ├── check-generic-space.sh        # Check space after generic filaments
+│   ├── check-space.sh                # Check available space
+│   ├── find-array-usage.sh           # Find array patterns
+│   ├── find-empty-space.sh           # Locate empty space
+│   ├── find-loop-counter.sh          # Find loop counters
+│   ├── find-pointers.sh              # Find pointer arrays
+│   ├── find-space-in-region.sh       # Find zero runs in memory regions
+│   ├── find-trans-type-function.sh   # Find translation functions
+│   ├── patch-gui-binary.py           # Add new profiles (injection method)
+│   ├── replace-gui-strings.py        # Replace existing profiles (in-place)
+│   ├── patch-gui.sh                  # Shell patcher wrapper
+│   └── verify-patches.sh             # Verify patched binary integrity
+└── rfid-helpers/                     # RFID/NFC debugging utilities
+    ├── check-firmware-version.sh     # Check firmware version and features
+    ├── compare-rfid-modules.sh       # Compare RFID modules
+    └── debug-rfid.sh                 # Debug RFID/NFC functionality
 ```
+
+**Note:** The `output/` directory is not tracked in git (excluded via .gitignore). It will be created automatically when you run patching scripts, and serves as the default location for patched binaries.
 
 ## Contributing
 
