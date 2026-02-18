@@ -69,5 +69,5 @@ curl -s "http://$SSH_HOST:7125/printer/gcode/script?script=FILAMENT_DT_UPDATE%20
 
 echo ""
 echo "5. Check recent RFID reads..."
-sshpass -p "$PASSWORD" ssh $SSH_OPTS root@$SSH_HOST 'tail -50 /home/lava/printer_data/logs/klippy.log | grep -A 5 -B 5 "card data parsing"'
+sshpass -p "$PASSWORD" ssh $SSH_OPTS root@$SSH_HOST 'tail -100 /home/lava/printer_data/logs/klippy.log | grep -A 5 -B 5 "card data parsing"'
 

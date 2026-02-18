@@ -74,6 +74,7 @@ These scripts help you understand the binary structure and locate important data
 ### RFID/NFC Debugging Scripts (`rfid-helpers/`)
 
 - **`debug-rfid.sh`** - Debug RFID/NFC functionality on Snapmaker U1 printer (requires SSH access)
+- **`debug-ntag-reading.sh`** - Debug NTAG215 RFID tag reading with detailed diagnostics (requires SSH access)
 - **`check-firmware-version.sh`** - Check firmware version and extended features on printer (requires SSH access)
 - **`compare-rfid-modules.sh`** - Compare RFID modules between printer and local overlay (requires SSH access)
 
@@ -163,6 +164,21 @@ Example:
 ./rfid-helpers/compare-rfid-modules.sh snapmaker-u1 default
 # or with custom password
 PASSWORD=mypassword ./rfid-helpers/compare-rfid-modules.sh 192.168.1.100 default
+```
+
+### Debug NTAG215 Tag Reading
+
+To debug NTAG215 RFID tag reading with detailed diagnostics:
+
+```bash
+./rfid-helpers/debug-ntag-reading.sh <printer-hostname> <profile>
+```
+
+Example:
+```bash
+./rfid-helpers/debug-ntag-reading.sh snapmaker-u1 default
+# or with custom password
+PASSWORD=mypassword ./rfid-helpers/debug-ntag-reading.sh 192.168.1.100 default
 ```
 
 **Requirements for SSH scripts:**
@@ -267,7 +283,8 @@ REPLACEMENTS = [
 └── rfid-helpers/                     # RFID/NFC debugging utilities
     ├── check-firmware-version.sh     # Check firmware version and features
     ├── compare-rfid-modules.sh       # Compare RFID modules
-    └── debug-rfid.sh                 # Debug RFID/NFC functionality
+    ├── debug-rfid.sh                 # Debug RFID/NFC functionality
+    └── debug-ntag-reading.sh         # Debug NTAG215 tag reading
 ```
 
 **Note:** The `output/` directory is not tracked in git (excluded via .gitignore). It will be created automatically when you run patching scripts, and serves as the default location for patched binaries.
