@@ -1,6 +1,35 @@
 #!/bin/bash
 
+usage() {
+    cat << EOF
+Usage: $0 <gui-binary>
+
+Search for loop counter patterns that iterate over filament arrays.
+
+Arguments:
+  gui-binary    Path to the GUI binary file to search
+
+What this script does:
+  - Finds references to pointer array (0x615b20)
+  - Disassembles code around pointer references
+  - Identifies loop bounds and iteration patterns
+  - Helps understand how many array elements are expected
+
+Example:
+  $0 /path/to/gui
+
+Requirements:
+  - objdump (part of binutils)
+
+EOF
+    exit 1
+}
+
 BINARY="$1"
+
+if [ -z "$BINARY" ] || [ ! -f "$BINARY" ]; then
+    usage
+fi
 
 echo "=== Searching for pointer array references and potential loop counters ==="
 echo ""

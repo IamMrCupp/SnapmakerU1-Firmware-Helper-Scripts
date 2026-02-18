@@ -1,10 +1,37 @@
 #!/bin/bash
+
+usage() {
+    cat << EOF
+Usage: $0 <gui-binary> [output-file]
+
+Shell script wrapper for analyzing and preparing GUI binary patches.
+
+Arguments:
+  gui-binary    Path to the original GUI binary file
+  output-file   Path for output file (default: gui-patched)
+
+What this script does:
+  - Checks available space after existing strings
+  - Calculates space requirements for new profiles
+  - Shows proposed filament additions
+  - Validates feasibility of string injection
+
+Example:
+  $0 /path/to/gui
+  $0 /path/to/gui output/gui-analyzed
+
+Note: This script analyzes only. Use patch-gui-binary.py or
+replace-gui-strings.py to actually apply patches.
+
+EOF
+    exit 1
+}
+
 BINARY="$1"
 OUTPUT="${2:-gui-patched}"
 
-if [ ! -f "$BINARY" ]; then
-    echo "Usage: $0 <gui-binary> [output-file]"
-    exit 1
+if [ -z "$BINARY" ] || [ ! -f "$BINARY" ]; then
+    usage
 fi
 
 cp "$BINARY" "$OUTPUT"

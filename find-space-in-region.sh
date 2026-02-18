@@ -1,6 +1,32 @@
 #!/bin/bash
 
+usage() {
+    cat << EOF
+Usage: $0 <gui-binary>
+
+Search for long zero runs in specific memory regions (0x31b000-0x31d000).
+
+Arguments:
+  gui-binary    Path to the GUI binary file to search
+
+What this script does:
+  - Scans the 0x31b000-0x31d000 region for empty space
+  - Reports consecutive zero byte runs >= 96 bytes
+  - Identifies safe memory regions near existing strings
+  - Provides addresses suitable for string injection
+
+Example:
+  $0 /path/to/gui
+
+EOF
+    exit 1
+}
+
 BINARY="$1"
+
+if [ -z "$BINARY" ] || [ ! -f "$BINARY" ]; then
+    usage
+fi
 
 echo "=== Searching for long zero runs in 0x31b000-0x31d000 region ==="
 echo ""

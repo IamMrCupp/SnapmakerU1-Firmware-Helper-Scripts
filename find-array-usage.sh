@@ -1,6 +1,32 @@
 #!/bin/bash
 
+usage() {
+    cat << EOF
+Usage: $0 <gui-binary>
+
+Locate pointer array patterns in the binary.
+
+Arguments:
+  gui-binary    Path to the GUI binary file to search
+
+What this script does:
+  - Searches for direct pointer array references (0x615b20)
+  - Looks for ARM64 ADRP+ADD instruction patterns
+  - Identifies how the pointer array is accessed in code
+  - Helps understand array usage for safe patching
+
+Example:
+  $0 /path/to/gui
+
+EOF
+    exit 1
+}
+
 BINARY="$1"
+
+if [ -z "$BINARY" ] || [ ! -f "$BINARY" ]; then
+    usage
+fi
 
 echo "=== Searching for pointer array references in binary ==="
 echo ""

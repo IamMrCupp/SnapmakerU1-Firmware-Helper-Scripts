@@ -1,6 +1,33 @@
 #!/bin/bash
 
+usage() {
+    cat << EOF
+Usage: $0 <gui-binary>
+
+Analyze address ranges to diagnose crashes and validate memory regions.
+
+Arguments:
+  gui-binary    Path to the GUI binary file to analyze
+
+What this script does:
+  - Compares original and new string address ranges
+  - Identifies potential address validation issues
+  - Examines memory space after original strings
+  - Suggests strategies for safe memory regions
+
+Example:
+  $0 /path/to/gui
+  $0 output/gui-patched
+
+EOF
+    exit 1
+}
+
 BINARY="$1"
+
+if [ -z "$BINARY" ] || [ ! -f "$BINARY" ]; then
+    usage
+fi
 
 echo "=== Address range comparison ==="
 echo "Original strings: 0x31b7f0 - 0x31b830 (all in same region)"

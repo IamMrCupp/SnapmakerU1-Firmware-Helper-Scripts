@@ -1,6 +1,37 @@
 #!/bin/bash
 
+usage() {
+    cat << EOF
+Usage: $0 <patched-binary>
+
+Verify patched binary structure, strings, and pointers are correct.
+
+Arguments:
+  patched-binary    Path to the patched GUI binary to verify
+
+What this script does:
+  - Checks that new strings are present
+  - Verifies pointer array structure
+  - Validates new string locations in memory
+  - Confirms addresses are in valid sections
+  - Checks for running GUI processes
+
+Example:
+  $0 output/gui-patched
+  $0 /tmp/gui-test
+
+Requirements:
+  - greadelf (GNU readelf, install via: brew install binutils)
+
+EOF
+    exit 1
+}
+
 BINARY="$1"
+
+if [ -z "$BINARY" ] || [ ! -f "$BINARY" ]; then
+    usage
+fi
 
 echo "=== Verifying patched binary structure ==="
 echo ""

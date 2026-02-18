@@ -1,5 +1,33 @@
 #!/bin/bash
+
+usage() {
+    cat << EOF
+Usage: $0 <gui-binary>
+
+Locate pointer arrays to filament strings in the binary.
+
+Arguments:
+  gui-binary    Path to the GUI binary file to search
+
+What this script does:
+  - Searches for pointer sequences in little-endian format
+  - Checks reference counts for each filament string
+  - Maps the pointer array structure
+  - Identifies how strings are accessed
+
+Example:
+  $0 /path/to/gui
+  $0 output/gui-patched
+
+EOF
+    exit 1
+}
+
 BINARY="$1"
+
+if [ -z "$BINARY" ] || [ ! -f "$BINARY" ]; then
+    usage
+fi
 
 echo "=== Looking for pointer array to filament strings ==="
 # The addresses in little-endian format

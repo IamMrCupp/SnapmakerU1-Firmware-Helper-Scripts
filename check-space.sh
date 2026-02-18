@@ -1,5 +1,33 @@
 #!/bin/bash
+
+usage() {
+    cat << EOF
+Usage: $0 <gui-binary>
+
+Verify available space for new strings and pointers in the GUI binary.
+
+Arguments:
+  gui-binary    Path to the GUI binary file to check
+
+What this script does:
+  - Checks space after existing filament strings (0x31b840)
+  - Examines pointer array area for available space (0x615b50)
+  - Verifies string boundaries and null padding
+  - Confirms safe regions for patching
+
+Example:
+  $0 /path/to/gui
+  $0 output/gui-patched
+
+EOF
+    exit 1
+}
+
 BINARY="$1"
+
+if [ -z "$BINARY" ] || [ ! -f "$BINARY" ]; then
+    usage
+fi
 
 echo "=== Checking space after existing strings ==="
 # Strings end at 0x31b830 + 16 = 0x31b840

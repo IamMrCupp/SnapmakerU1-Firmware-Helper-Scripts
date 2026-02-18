@@ -24,6 +24,9 @@ These scripts allow you to reverse-engineer and modify the Snapmaker U1's GUI bi
   - `readelf` (binary analysis)
   - `strings` (string extraction)
   - `file` (file type identification)
+  - `sshpass` (for SSH automation, install via: `brew install sshpass` on macOS)
+
+**Getting Help**: All scripts support `-h`, `--help`, or running without arguments to display usage information.
 
 ## Scripts
 
@@ -51,6 +54,10 @@ These scripts help you understand the binary structure and locate important data
 ### Verification Scripts
 
 - **`verify-patches.sh`** - Verifies patched binary structure, strings, and pointers are correct
+
+### Debugging Scripts
+
+- **`debug-rfid.sh`** - Debug RFID/NFC functionality on Snapmaker U1 printer (requires SSH access)
 
 ## Usage
 
@@ -91,7 +98,25 @@ After patching, verify the changes were applied correctly:
 ### 3. Deploy the Patched Binary
 
 Follow your device's firmware update procedure to deploy the modified GUI binary. **Always keep a backup of the original!**
+## Debugging RFID/NFC
 
+To debug RFID/NFC functionality on your Snapmaker U1:
+
+```bash
+./debug-rfid.sh <printer-hostname> <profile>
+```
+
+Example:
+```bash
+./debug-rfid.sh snapmaker-u1 default
+# or with custom password
+PASSWORD=mypassword ./debug-rfid.sh 192.168.1.100 default
+```
+
+This script requires:
+- SSH access to your printer (root user)
+- `sshpass` installed (`brew install sshpass` on macOS)
+- Network connectivity to the printer
 ## Patching Methods
 
 ### Method 1: Add New Profiles (patch-gui-binary.py)
@@ -170,6 +195,7 @@ REPLACEMENTS = [
 ├── analyze-gui.sh                    # Analyze binary structure
 ├── check-generic-space.sh            # Check space after generic filaments
 ├── check-space.sh                    # Check available space
+├── debug-rfid.sh                     # Debug RFID/NFC functionality (SSH)
 ├── find-array-usage.sh               # Find array patterns
 ├── find-empty-space.sh               # Locate empty space
 ├── find-loop-counter.sh              # Find loop counters

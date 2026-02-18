@@ -1,6 +1,32 @@
 #!/bin/bash
 
+usage() {
+    cat << EOF
+Usage: $0 <gui-binary>
+
+Find translation type functions in the GUI binary.
+
+Arguments:
+  gui-binary    Path to the GUI binary file to search
+
+What this script does:
+  - Locates the 'trans_type' string in the binary
+  - Finds code references to this string
+  - Identifies translation/type conversion functions
+  - Helps understand string processing logic
+
+Example:
+  $0 /path/to/gui
+
+EOF
+    exit 1
+}
+
 BINARY="$1"
+
+if [ -z "$BINARY" ] || [ ! -f "$BINARY" ]; then
+    usage
+fi
 
 echo "=== Finding trans_type function ==="
 echo ""

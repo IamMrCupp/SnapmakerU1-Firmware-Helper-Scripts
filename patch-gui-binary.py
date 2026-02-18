@@ -22,6 +22,42 @@ NEW_PROFILES = [
     "PolyMax PETG",      # 0x1b7ed0
 ]
 
+def print_usage():
+    """Print detailed usage information."""
+    print("""
+Usage: patch-gui-binary.py <input-gui-binary> <output-gui-binary>
+
+Add custom Polymaker filament profiles to the Snapmaker U1 GUI binary.
+
+Arguments:
+  input-gui-binary     Path to the original GUI binary file
+  output-gui-binary    Path where patched binary will be written
+
+What this script does:
+  - Validates input binary and available space
+  - Injects 6 new filament profile strings into empty space (0x1b7e80)
+  - Updates pointer array to reference new strings (0x615b50)
+  - Creates patched binary with new profiles
+
+New profiles added:
+  1. Panchroma PLA
+  2. Panchroma Matte
+  3. Panchroma Silk
+  4. PolyLite PLA
+  5. PolyMax PLA
+  6. PolyMax PETG
+
+Examples:
+  ./patch-gui-binary.py tmp/extracted/rootfs/bin/gui output/gui-patched
+  ./patch-gui-binary.py /path/to/gui /tmp/gui-test
+
+Note: Use verify-patches.sh to validate the patched binary before deployment.
+
+Warning: This method may have address range validation issues on some
+firmware versions. Consider using replace-gui-strings.py as a more
+stable alternative.
+""")
+
 def patch_binary(input_path, output_path):
     """Patch the GUI binary to add new filament profiles."""
     
@@ -110,11 +146,9 @@ def patch_binary(input_path, output_path):
     return True
 
 def main():
-    if len(sys.argv) != 3:
-        print("Usage: patch-gui-binary.py <input-gui-binary> <output-gui-binary>")
-        print("\nExample:")
-        print("  ./patch-gui-binary.py tmp/extracted/rootfs/bin/gui tmp/gui-patched")
-        sys.exit(1)
+    if len(sys.argv) != 3 or sys.argv[1] in ['-h', '--help', 'help']:
+        print_usage()
+        sys.exit(0 if len(sys.argv) == 2 else 1)
     
     input_path = Path(sys.argv[1])
     output_path = Path(sys.argv[2])

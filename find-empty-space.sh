@@ -1,12 +1,33 @@
 #!/bin/bash
-#!/bin/bash
+
+usage() {
+    cat << EOF
+Usage: $0 <gui-binary>
+
+Find unused/empty space in the binary for safe string injection.
+
+Arguments:
+  gui-binary    Path to the GUI binary file to search
+
+What this script does:
+  - Searches for 96+ consecutive zero bytes (6 strings × 16 bytes)
+  - Reports all empty space regions found
+  - Identifies the best locations for string injection
+  - Shows offset addresses in both hex and decimal
+
+Example:
+  $0 /path/to/gui
+  $0 output/gui-patched
+
+EOF
+    exit 1
+}
 
 BINARY="$1"
 NEEDED_BYTES=96  # 6 strings × 16 bytes
 
-if [ ! -f "$BINARY" ]; then
-    echo "Usage: $0 <path-to-gui-binary>"
-    exit 1
+if [ -z "$BINARY" ] || [ ! -f "$BINARY" ]; then
+    usage
 fi
 
 echo "=== Searching for $NEEDED_BYTES consecutive zero bytes ==="

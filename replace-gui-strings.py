@@ -16,6 +16,43 @@ REPLACEMENTS = [
     (0x31b830, "Polylite PETG",  "PolyMax PETG"),       # Premium PETG
 ]
 
+def print_usage():
+    """Print detailed usage information."""
+    print("""
+Usage: replace-gui-strings.py <input-gui> <output-gui>
+
+Replace existing Polymaker filament profiles with custom ones (in-place method).
+
+Arguments:
+  input-gui     Path to the original GUI binary file
+  output-gui    Path where patched binary will be written
+
+What this script does:
+  - Validates input binary and string locations
+  - Replaces 5 existing Polymaker strings in-place
+  - Preserves all other binary data unchanged
+  - Creates patched binary with updated profiles
+
+Replacements made:
+""")
+    for _, old, new in REPLACEMENTS:
+        print(f"  '{old}' → '{new}'")
+    
+    print("""
+Examples:
+  ./replace-gui-strings.py /path/to/gui output/gui-patched
+  ./replace-gui-strings.py tmp/gui /tmp/gui-test
+
+Advantages of this method:
+  - More stable than injection method
+  - No address range validation issues
+  - All 12 profiles still work in Klipper/web interface
+  - Safer and more reliable patching approach
+
+Note: This replaces existing profiles in the GUI dropdown, but all
+original profiles remain functional via Klipper configuration.
+""")
+
 def replace_strings(input_path, output_path):
     """Replace the 5 Polymaker strings in the GUI binary."""
     
@@ -55,12 +92,9 @@ def replace_strings(input_path, output_path):
     return True
 
 if __name__ == '__main__':
-    if len(sys.argv) != 3:
-        print("Usage: replace-gui-strings.py <input-gui> <output-gui>")
-        print("\nReplaces the 5 existing Polymaker strings with:")
-        for _, old, new in REPLACEMENTS:
-            print(f"  '{old}' → '{new}'")
-        sys.exit(1)
+    if len(sys.argv) != 3 or (len(sys.argv) == 2 and sys.argv[1] in ['-h', '--help', 'help']):
+        print_usage()
+        sys.exit(0 if len(sys.argv) == 2 else 1)
     
     input_path = Path(sys.argv[1])
     output_path = Path(sys.argv[2])
